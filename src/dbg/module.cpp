@@ -688,8 +688,8 @@ bool ModLoad(duint Base, duint Size, const char* FullPath)
             strcpy_s(file, FullPath);
     }
 
-    // Calculate module hash from full file name
-    info.hash = ModHashFromName(file);
+    char originalfilename[MAX_PATH];
+    strcpy_s( originalfilename, file );
 
     // Copy the extension into the module struct
     {
@@ -702,8 +702,40 @@ bool ModLoad(duint Base, duint Size, const char* FullPath)
         }
     }
 
+    char newfilename[MAX_MODULE_SIZE];
+    strcpy_s( newfilename, originalfilename );
+
+    int nIndex = 1;
+    duint modBase = ModBaseFromName( originalfilename );
+    while ( modBase )
+    {
+        char tmp[MAX_MODULE_SIZE];
+        
+        strcpy_s( newfilename, file );
+
+        sprintf_s( tmp, "_%d", nIndex );
+        strcat_s( newfilename, tmp );
+        strcat_s( newfilename, info.extension );
+        modBase = ModBaseFromName( newfilename );
+        nIndex++;
+    }
+
+    // Calculate module hash from full file name
+    info.hash = ModHashFromName( newfilename );
+
+
+    // Copy the extension into the module struct
+    {
+        char* extensionPos = strrchr( newfilename, '.' );
+
+        if ( extensionPos )
+        {
+            extensionPos[0] = '\0';
+        }
+    }
+
     // Copy information to struct
-    strcpy_s(info.name, file);
+    strcpy_s(info.name, newfilename );
     info.base = Base;
     info.size = Size;
     info.fileHandle = nullptr;

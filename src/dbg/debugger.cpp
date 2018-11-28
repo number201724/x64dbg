@@ -1384,8 +1384,11 @@ static void cbCreateProcess(CREATE_PROCESS_DEBUG_INFO* CreateProcessInfo)
 
         if(settingboolget("Events", "EntryBreakpoint"))
         {
-            sprintf_s(command, "bp %p,\"%s\",ss", (duint)CreateProcessInfo->lpStartAddress, GuiTranslateText(QT_TRANSLATE_NOOP("DBG", "entry breakpoint")));
-            cmddirectexec(command);
+            if ( CreateProcessInfo->lpStartAddress != CreateProcessInfo->lpBaseOfImage )
+            {
+                sprintf_s( command, "bp %p,\"%s\",ss", (duint)CreateProcessInfo->lpStartAddress, GuiTranslateText( QT_TRANSLATE_NOOP( "DBG", "entry breakpoint" ) ) );
+                cmddirectexec( command );
+            }
         }
 
         bTraceRecordEnabledDuringTrace = settingboolget("Engine", "TraceRecordEnabledDuringTrace");
@@ -2690,7 +2693,7 @@ static void debugLoopFunction(void* lpParameter, bool attach)
         CloseHandle(fdProcessInfo->hProcess);
         CloseHandle(fdProcessInfo->hThread);
         fdProcessInfo->hProcess = fdProcessInfo->hThread = nullptr;
-        DebugLoop();
+        DebugLoopEx(100);
     }
 
     if(bDatabaseLoaded) //fixes data loss when attach failed (https://github.com/x64dbg/x64dbg/issues/1899)
