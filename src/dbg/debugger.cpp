@@ -2693,7 +2693,7 @@ static void debugLoopFunction(void* lpParameter, bool attach)
         CloseHandle(fdProcessInfo->hProcess);
         CloseHandle(fdProcessInfo->hThread);
         fdProcessInfo->hProcess = fdProcessInfo->hThread = nullptr;
-        DebugLoopEx(100);
+        DebugLoopEx(1);
     }
 
     if(bDatabaseLoaded) //fixes data loss when attach failed (https://github.com/x64dbg/x64dbg/issues/1899)
